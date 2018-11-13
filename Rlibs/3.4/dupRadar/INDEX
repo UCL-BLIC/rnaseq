@@ -1,0 +1,36 @@
+analyzeDuprates         Read in a BAM file and count the tags falling
+                        on the features described in the GTF file
+bamutilMarkDuplicates   Mark duplicates using bamutil
+cumulativeDuprateBarplot
+                        Barplot showing the cumulative read counts
+                        fraction
+dm                      Duplication matrix of a good RNASeq experiment
+dm.bad                  Duplication matrix of a failed RNASeq
+                        experiment
+dupRadar                dupRadar.
+dupRadar_examples       Example data containing precomputed matrices
+                        for two RNASeq experiments
+duprateExpBoxplot       Duplication rate ~ total reads per kilobase
+                        (RPK) boxplot
+duprateExpDensPlot      Duplication rate ~ total read count plot
+duprateExpFit           Duplication rate ~ total read count fit model
+duprateExpIdentify      Identify genes plotted by 'duprateExpPlot'
+duprateExpPlot          Duplication rate ~ total read count plot
+expressionHist          Draw histogram with the expression values
+getBinDuplication       Helper function used in 'duprateExpBoxplot'
+getBinRpkMean           Helper function used in 'duprateExpBoxplot'
+getDupMatBin            Helper function used in 'getBinDuplication' and
+                        'getBinRpkMean'
+getDupMatStats          Report duplication stats on regions
+getDynamicRange         Dynamic range
+getRpkBinReadCountFraction
+                        Helper function used in
+                        'readcountExpressionBoxplot'
+getRpkCumulativeReadCountFraction
+                        Helper function used in
+                        'readcountExpressionBoxplot'
+markDuplicates          Program dispatchers to mark duplicated reads
+                        from a BAM file
+picardMarkDuplicates    Mark duplicates using Picard tools
+readcountExpBoxplot     Barplot of percentage of reads falling into
+                        expression bins

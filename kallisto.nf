@@ -219,19 +219,19 @@ if(params.readPaths){
             .from(params.readPaths)
             .map { row -> [ row[0], [file(row[1][0])]] }
             .ifEmpty { exit 1, "params.readPaths was empty - no input files supplied" }
-            .into { raw_reads_fastqc; raw_reads_trimgalore; raw_reads_kallisto }
+            .into { raw_reads_fastqc; raw_reads_trimgalore }
     } else {
         Channel
             .from(params.readPaths)
             .map { row -> [ row[0], [file(row[1][0]), file(row[1][1])]] }
             .ifEmpty { exit 1, "params.readPaths was empty - no input files supplied" }
-            .into { raw_reads_fastqc; raw_reads_trimgalore; raw_reads_kallisto }
+            .into { raw_reads_fastqc; raw_reads_trimgalore }
     }
 } else {
     Channel
         .fromFilePairs( params.reads, size: params.singleEnd ? 1 : 2 )
         .ifEmpty { exit 1, "Cannot find any reads matching: ${params.reads}\nNB: Path needs to be enclosed in quotes!\nNB: Path requires at least one * wildcard!\nIf this is single-end data, please specify --singleEnd on the command line." }
-        .into { raw_reads_fastqc; raw_reads_trimgalore; raw_reads_kallisto }
+        .into { raw_reads_fastqc; raw_reads_trimgalore }
 }
 
 
@@ -509,47 +509,6 @@ process trim_galore {
         """
     }
 }
-
-
-/*
- * STEP 2.5 - align with kallisto
- */
-//    process kallisto {
-//    tag "$prefix"
-
-//        input:
-//        set val(name), file(reads) from raw_reads_kallisto
-//        file kallisto_index from kallisto_index
-//        file wherearemyfiles
-
-//        output:
-//        file "${prefix}.h5" into $prefix
-//        file "${prefix}.tsv" into $prefix
-//        file run_info.json into $prefix
-//        file "where_are_my_files.txt"
-
-//        script:
-//        prefix = reads[0].toString() - ~/(_R1)?(_trimmed)?(_val_1)?(\.fq)?(\.fastq)?(\.gz)?$/
-        
-//        if (params.singleEnd) {
-//            """
-//            kallisto quant \\ 
-//            -i $kallisto_index \\ 
-//            -o $prefix \\ 
-//            --single \\ 
-//            -l 200 \\
-//            -s 20 
-//            $reads
-//            """
-//        } else {
-//            """
-//            kallisto quant \\
-//            -i $kallisto_index \\
-//            -o $prefix 
-//            ${reads[0]} ${reads[1]}
-//            """
-//        }
-//    }
 
 
 

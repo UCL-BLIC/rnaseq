@@ -32,6 +32,9 @@ message("Output basename       : ", input_bam_basename)
 
 
 # Load / install packages
+
+.libPaths( c( "/shared/ucl/depts/cancer/apps/nextflow_pipelines/rnaseq-master/Rlibs/3.4", .libPaths() ) )
+
 if (length(args) > 5) { .libPaths( c( args[6], .libPaths() ) ) }
 if (!require("dupRadar")){
   source("http://bioconductor.org/biocLite.R")

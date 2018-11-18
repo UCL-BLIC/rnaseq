@@ -536,7 +536,7 @@ process kallisto {
 
     output:
     file '*' into kallisto_results
-    file wherearemyfiles
+    file "where_are_my_files.txt"
 
 
     script:

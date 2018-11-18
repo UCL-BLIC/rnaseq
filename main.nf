@@ -1,4 +1,3 @@
-#!/usr/bin/env nextflow
 /*
 ===============================================================
  nf-core/rnaseq
@@ -67,6 +66,7 @@ def helpMessage() {
       --skip_qc                     Skip all QC steps apart from MultiQC
       --skip_fastqc                 Skip FastQC
       --skip_rseqc                  Skip RSeQC
+      --skip_kallisto 		    Skip kallisto
       --skip_genebody_coverage      Skip calculating genebody coverage
       --skip_preseq                 Skip Preseq
       --skip_dupradar               Skip dupRadar (and Picard MarkDups)
@@ -101,6 +101,7 @@ params.project = false
 params.genome = false
 params.star_index = params.genome ? params.genomes[ params.genome ].star ?: false : false
 params.fasta = params.genome ? params.genomes[ params.genome ].fasta ?: false : false
+params.kallisto_index = params.genome ? params.genomes[ params.genome ].kallisto ?: false : false
 params.gtf = params.genome ? params.genomes[ params.genome ].gtf ?: false : false
 params.gff = params.genome ? params.genomes[ params.genome ].gff ?: false : false
 params.bed12 = params.genome ? params.genomes[ params.genome ].bed12 ?: false : false
@@ -110,6 +111,7 @@ params.plaintext_email = false
 params.seqCenter = false
 params.skip_qc = false
 params.skip_fastqc = false
+params.skip_kallisto = false
 params.skip_rseqc = false
 params.skip_genebody_coverage = false
 params.skip_preseq = false
@@ -148,6 +150,11 @@ if (params.pico){
 // Validate inputs
 if (params.aligner != 'star' && params.aligner != 'hisat2'){
     exit 1, "Invalid aligner option: ${params.aligner}. Valid options: 'star', 'hisat2'"
+}
+if( params.kallisto_index ){
+    kallisto_index = Channel
+        .fromPath(params.kallisto_index)
+        .ifEmpty { exit 1, "Kallisto index not found: ${params.kallisto_index}" }
 }
 if( params.star_index && params.aligner == 'star' ){
     star_index = Channel
@@ -219,19 +226,19 @@ if(params.readPaths){
             .from(params.readPaths)
             .map { row -> [ row[0], [file(row[1][0])]] }
             .ifEmpty { exit 1, "params.readPaths was empty - no input files supplied" }
-            .into { raw_reads_fastqc; raw_reads_trimgalore; raw_reads_kallisto }
+            .into { raw_reads_fastqc; raw_reads_trimgalore; }
     } else {
         Channel
             .from(params.readPaths)
             .map { row -> [ row[0], [file(row[1][0]), file(row[1][1])]] }
             .ifEmpty { exit 1, "params.readPaths was empty - no input files supplied" }
-            .into { raw_reads_fastqc; raw_reads_trimgalore; raw_reads_kallisto }
+            .into { raw_reads_fastqc; raw_reads_trimgalore; }
     }
 } else {
     Channel
         .fromFilePairs( params.reads, size: params.singleEnd ? 1 : 2 )
         .ifEmpty { exit 1, "Cannot find any reads matching: ${params.reads}\nNB: Path needs to be enclosed in quotes!\nNB: Path requires at least one * wildcard!\nIf this is single-end data, please specify --singleEnd on the command line." }
-        .into { raw_reads_fastqc; raw_reads_trimgalore; raw_reads_kallisto }
+        .into { raw_reads_fastqc; raw_reads_trimgalore; }
 }
 
 
@@ -264,6 +271,7 @@ if(params.aligner == 'star'){
     else if(params.fasta)          summary['Fasta Ref']    = params.fasta
     if(params.splicesites)         summary['Splice Sites'] = params.splicesites
 }
+if(params.kallisto_index)      summary['Kallisto Index']   = params.kallisto_index
 if(params.gtf)                 summary['GTF Annotation']  = params.gtf
 if(params.gff)                 summary['GFF3 Annotation']  = params.gff
 if(params.bed12)               summary['BED Annotation']  = params.bed12
@@ -488,7 +496,7 @@ process trim_galore {
     file wherearemyfiles
 
     output:
-    file "*fq.gz" into trimmed_reads
+    file "*fq.gz" into trimmed_reads, trimmed_reads_kallisto
     file "*trimming_report.txt" into trimgalore_results
     file "*_fastqc.{zip,html}" into trimgalore_fastqc_reports
     file "where_are_my_files.txt"
@@ -514,42 +522,45 @@ process trim_galore {
 /*
  * STEP 2.5 - align with kallisto
  */
-//    process kallisto {
-//    tag "$prefix"
+    process kallisto {
+    tag "$prefix"
+      publishDir "${params.outdir}/kallisto", mode: 'copy'
 
-//        input:
-//        set val(name), file(reads) from raw_reads_kallisto
-//        file kallisto_index from kallisto_index
-//        file wherearemyfiles
+	when:
+    	!params.skip_kallisto
 
-//        output:
-//        file "${prefix}.h5" into $prefix
-//        file "${prefix}.tsv" into $prefix
-//        file run_info.json into $prefix
-//        file "where_are_my_files.txt"
+        input:
+        set val(name), file(reads) from trimmed_reads_kallisto
+        file kallisto_index from kallisto_index.collect()
+        file wherearemyfiles
 
-//        script:
-//        prefix = reads[0].toString() - ~/(_R1)?(_trimmed)?(_val_1)?(\.fq)?(\.fastq)?(\.gz)?$/
+        output:
+        file '*' into kallisto_results
+	  file wherearemyfiles
+
+
+        script:
+        prefix = reads[0].toString() - ~/(_R1)?(_trimmed)?(_val_1)?(\.fq)?(\.fastq)?(\.gz)?$/
         
-//        if (params.singleEnd) {
-//            """
-//            kallisto quant \\ 
-//            -i $kallisto_index \\ 
-//            -o $prefix \\ 
-//            --single \\ 
-//            -l 200 \\
-//            -s 20 
-//            $reads
-//            """
-//        } else {
-//            """
-//            kallisto quant \\
-//            -i $kallisto_index \\
-//            -o $prefix 
-//            ${reads[0]} ${reads[1]}
-//            """
-//        }
-//    }
+        if (params.singleEnd) {
+            """
+            kallisto quant \\ 
+            -i $kallisto_index \\ 
+            -o $prefix \\ 
+            --single \\ 
+            -l 200 \\
+            -s 20 
+            $reads
+            """
+        } else {
+            """
+            kallisto quant \\
+            -i $kallisto_index \\
+            -o $prefix 
+            ${reads[0]} ${reads[1]}
+            """
+        }
+    }
 
 
 

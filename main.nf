@@ -522,46 +522,45 @@ process trim_galore {
 /*
  * STEP 2.5 - align with kallisto
  */
-    process kallisto {
+process kallisto {
     tag "$prefix"
-      publishDir "${params.outdir}/kallisto", mode: 'copy'
+    publishDir "${params.outdir}/kallisto", mode: 'copy'
 
-	when:
-    	!params.skip_kallisto
+    when:
+    !params.skip_kallisto
 
-        input:
-        set val(name), file(reads) from trimmed_reads_kallisto
-        file kallisto_index from kallisto_index.collect()
-        file wherearemyfiles
+    input:
+    file reads from trimmed_reads_kallisto
+    file kallisto_index from kallisto_index.collect()
+    file wherearemyfiles
 
-        output:
-        file '*' into kallisto_results
-	  file wherearemyfiles
+    output:
+    file '*' into kallisto_results
+    file wherearemyfiles
 
 
-        script:
-        prefix = reads[0].toString() - ~/(_R1)?(_trimmed)?(_val_1)?(\.fq)?(\.fastq)?(\.gz)?$/
+    script:
+    prefix = reads[0].toString() - ~/(_R1)?(_trimmed)?(_val_1)?(\.fq)?(\.fastq)?(\.gz)?$/
         
-        if (params.singleEnd) {
-            """
-            kallisto quant \\ 
-            -i $kallisto_index \\ 
-            -o $prefix \\ 
-            --single \\ 
-            -l 200 \\
-            -s 20 
-            $reads
-            """
-        } else {
-            """
-            kallisto quant \\
-            -i $kallisto_index \\
-            -o $prefix 
-            ${reads[0]} ${reads[1]}
-            """
-        }
+    if (params.singleEnd) {
+        """
+        kallisto quant \\ 
+        -i $kallisto_index \\ 
+        -o $prefix \\ 
+        --single \\ 
+        -l 200 \\
+        -s 20 
+        $reads
+        """
+    } else {
+        """
+        kallisto quant \\
+        -i $kallisto_index \\
+        -o $prefix 
+        ${reads[0]} ${reads[1]}
+        """
     }
-
+}
 
 
 /*

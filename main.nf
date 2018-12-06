@@ -187,6 +187,17 @@ if( params.gtf ){
     exit 1, "No GTF or GFF3 annotation specified!"
 }
 
+if( params.gtf_rRNA ){
+    Channel
+       	.fromPath(params.gtf_rRNA)
+       	.ifEmpty { exit 1, "GTF rRNA annotation file not found: ${params.gtf}" }
+       	.into { gtf_rRNA_featureCounts }
+
+} else {
+    exit 1, "No GTF or GFF3 annotation specified!"
+}
+
+
 if( params.bed12 ){
     bed12 = Channel
         .fromPath(params.bed12)
@@ -970,6 +981,7 @@ process featureCounts {
     input:
     file bam_featurecounts
     file gtf from gtf_featureCounts.collect()
+    file gtf_rRNA from gtf_rRNA_featureCounts.collect()
     file biotypes_header
 
     output:
@@ -988,7 +1000,7 @@ process featureCounts {
     sample_name = bam_featurecounts.baseName - 'Aligned.sortedByCoord.out'
     """
     featureCounts -a $gtf -g gene_id -o ${bam_featurecounts.baseName}_gene.featureCounts.txt -p -s $featureCounts_direction $bam_featurecounts
-    featureCounts -a $gtf -g gene_biotype -o ${bam_featurecounts.baseName}_biotype.featureCounts.txt -p -s $featureCounts_direction $bam_featurecounts
+    featureCounts -a $gtf_rRNA -g gene_biotype -o ${bam_featurecounts.baseName}_biotype.featureCounts.txt -p -s $featureCounts_direction $bam_featurecounts
     cut -f 1,7 ${bam_featurecounts.baseName}_biotype.featureCounts.txt | tail -n +3 | cat $biotypes_header - >> ${bam_featurecounts.baseName}_biotype_counts_mqc.txt
     mqc_features_stat.py ${bam_featurecounts.baseName}_biotype_counts_mqc.txt -s $sample_name -f rRNA -o ${bam_featurecounts.baseName}_biotype_counts_gs_mqc.tsv
     """

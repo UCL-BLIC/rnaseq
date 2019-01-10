@@ -103,6 +103,7 @@ params.star_index = params.genome ? params.genomes[ params.genome ].star ?: fals
 params.fasta = params.genome ? params.genomes[ params.genome ].fasta ?: false : false
 params.kallisto_index = params.genome ? params.genomes[ params.genome ].kallisto ?: false : false
 params.gtf = params.genome ? params.genomes[ params.genome ].gtf ?: false : false
+params.gtf_rRNA = params.genome ? params.genomes[ params.genome ].gtf_rRNA ?: false : false
 params.gff = params.genome ? params.genomes[ params.genome ].gff ?: false : false
 params.bed12 = params.genome ? params.genomes[ params.genome ].bed12 ?: false : false
 params.hisat2_index = params.genome ? params.genomes[ params.genome ].hisat2 ?: false : false
@@ -555,20 +556,11 @@ process kallisto {
         
     if (params.singleEnd) {
         """
-        kallisto quant \\ 
-        -i $kallisto_index \\ 
-        -o $prefix \\ 
-        --single \\ 
-        -l 200 \\
-        -s 20 
-        $reads
+        kallisto quant -i $kallisto_index -o $prefix --single -l 200 -s 20 $reads
         """
     } else {
         """
-        kallisto quant \\
-        -i $kallisto_index \\
-        -o $prefix 
-        ${reads[0]} ${reads[1]}
+        kallisto quant -i $kallisto_index -o $prefix ${reads[0]} ${reads[1]}
         """
     }
 }

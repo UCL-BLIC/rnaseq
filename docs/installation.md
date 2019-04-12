@@ -1,4 +1,4 @@
-# rnaseq Installation
+# UCL-BLIC/rnaseq Installation
 
 The UCL-BLIC/rnaseq pipeline is already installed in legion and myriad. You just need to load nextflow and start using it:
 

@@ -8,7 +8,7 @@
 
 ### Introduction
 
-**nfcore/rnaseq** is a bioinformatics analysis pipeline used for RNA sequencing data, modified to add kallisto.
+**UCL-BLIC/rnaseq** is a bioinformatics analysis pipeline used for RNA sequencing data, modified to add kallisto.
 
 The workflow processes raw data from FastQ inputs ([FastQC](https://www.bioinformatics.babraham.ac.uk/projects/fastqc/), [Trim Galore!](https://www.bioinformatics.babraham.ac.uk/projects/trim_galore/)), aligns the reads 
 ([STAR](https://github.com/alexdobin/STAR) or [HiSAT2](https://ccb.jhu.edu/software/hisat2/index.shtml)), generates gene counts ([featureCounts](http://bioinf.wehi.edu.au/featureCounts/), 
@@ -19,7 +19,7 @@ The workflow processes raw data from FastQ inputs ([FastQC](https://www.bioinfor
 The pipeline is built using [Nextflow](https://www.nextflow.io), a bioinformatics workflow tool to run tasks across multiple compute infrastructures in a very portable manner.
 
 ### Documentation
-The nfcore/rnaseq pipeline comes with documentation about the pipeline, found in the `docs/` directory:
+The UCL-BLIC/rnaseq pipeline comes with documentation about the pipeline, found in the `docs/` directory:
 
 1. [Installation](docs/installation.md)
 2. [Running the pipeline](docs/usage.md)

@@ -6,7 +6,7 @@ The typical command for running the pipeline is as follows:
 module load blic-modules
 module load nextflow
 
-nextflow_chipseq --reads '*_R{1,2}.fastq.gz' --genome GRCh38
+nextflow_rnaseq --reads '*_R{1,2}.fastq.gz' --genome GRCh38
 ```
 
 This will launch the pipeline with the `legion` or `myriad` configuration profile, depending on where you submit the job from.
@@ -23,7 +23,7 @@ results         # Finished results (configurable, see below)
 ## Main Arguments
 
 ### `-profile`
-This parameter is NOT necessary as the shortcut `nextflow_wgsalign` takes care of selecting the appropiate configuration profile. But just for your information, profiles are used to give 
+This parameter is NOT necessary as the shortcut `nextflow_rnaseq` takes care of selecting the appropiate configuration profile. But just for your information, profiles are used to give 
 configuration presets for different compute environments.
 
 * `legion`

@@ -1,6 +1,6 @@
-# nfcore/rnaseq Documentation
+# UCL-BLIC/rnaseq Documentation
 
-The nfcore/rnaseq documentation is split into the following files:
+The UCL-BLIC/rnaseq documentation is split into the following files:
 
 
 1. [Installation](installation.md)

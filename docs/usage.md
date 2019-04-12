@@ -1,21 +1,15 @@
 # nfcore/rnaseq Usage
 
-## General Nextflow info
-Nextflow handles job submissions on SLURM or other environments, and supervises running the jobs. Thus the Nextflow process must run until the pipeline is finished. We recommend that you put the process running in the background through `screen` / `tmux` or similar tool. Alternatively you can run nextflow within a cluster job submitted your job scheduler.
-
-It is recommended to limit the Nextflow Java virtual machines memory. We recommend adding the following line to your environment (typically in `~/.bashrc` or `~./bash_profile`):
-
-```bash
-NXF_OPTS='-Xms1g -Xmx4g'
-```
-
 ## Running the pipeline
 The typical command for running the pipeline is as follows:
 ```bash
-nextflow run nf-core/rnaseq --reads '*_R{1,2}.fastq.gz' --genome GRCh37 -profile docker
+module load blic-modules
+module load nextflow
+
+nextflow_chipseq --reads '*_R{1,2}.fastq.gz' --genome GRCh38
 ```
 
-This will launch the pipeline with the `docker` configuration profile (Swedish UPPMAX users use `-profile uppmax`). See below for more information about profiles.
+This will launch the pipeline with the `legion` or `myriad` configuration profile, depending on where you submit the job from.
 
 Note that the pipeline will create the following files in your working directory:
 
@@ -26,48 +20,16 @@ results         # Finished results (configurable, see below)
 # Other nextflow hidden files, eg. history of pipeline runs and old logs.
 ```
 
-### Updating the pipeline
-When you run the above command, Nextflow automatically pulls the pipeline code from GitHub and stores it as a cached version. When running the pipeline after this, it will always use the cached version if available - even if the pipeline has been updated since. To make sure that you're running the latest version of the pipeline, make sure that you regularly update the cached version of the pipeline:
-
-```bash
-nextflow pull nf-core/rnaseq
-```
-
-### Reproducibility
-It's a good idea to specify a pipeline version when running the pipeline on your data. This ensures that a specific version of the pipeline code and software are used when you run your pipeline. If you keep using the same tag, you'll be running the same version of the pipeline, even if there have been changes to the code since.
-
-First, go to the [nfcore/rnaseq releases page](https://github.com/nf-core/rnaseq/releases) and find the latest version number - numeric only (eg. `1.0`). Then specify this when running the pipeline with `-r` (one hyphen) - eg. `-r 1.0`.
-
-This version number will be logged in reports when you run the pipeline, so that you'll know what you used when you look back in the future.
-
-
 ## Main Arguments
 
 ### `-profile`
-Use this parameter to choose a configuration profile. Each profile is designed for a different compute environment - follow the links below to see instructions for running on that system. Available profiles are:
+This parameter is NOT necessary as the shortcut `nextflow_wgsalign` takes care of selecting the appropiate configuration profile. But just for your information, profiles are used to give 
+configuration presets for different compute environments.
 
-* `docker`
-    * A generic configuration profile to be used with [Docker](http://docker.com/)
-    * Runs using the `local` executor and pulls software from dockerhub: [`nfcore/rnaseq`](http://hub.docker.com/r/nfcore/rnaseq/)
-* `uppmax`, `uppmax_modules`, `uppmax_devel`
-    * Designed to be used on the Swedish [UPPMAX](http://uppmax.uu.se/) clusters such as `milou`, `rackham`, `bianca` and `irma`
-    * See [`docs/configuration/uppmax.md`](configuration/uppmax.md)
-* `hebbe`
-    * Designed to be run on the [c3se Hebbe cluster](http://www.c3se.chalmers.se/index.php/Hebbe) in Chalmers, Gothenburg.
-    * See [`docs/configuration/c3se.md`](configuration/c3se.md)
-* `binac`, `cfc`
-    * Profiles for clusters at QBiC in Tübingen, Germany
-    * See [`docs/configuration/qbic.md`](configuration/qbic.md)
-* `awsbatch`
-    * Profile for running on AWSBatch, specific parameters are described below
-* `aws`
-    * A starter configuration for running the pipeline on Amazon Web Services. Uses docker and Spark.
-    * See [`docs/configuration/aws.md`](configuration/aws.md)
-* `standard`
-    * The default profile, used if `-profile` is not specified at all. Runs locally and expects all software to be installed and available on the `PATH`.
-    * This profile is mainly designed to be used as a starting point for other configurations and is inherited by most of the other profiles.
-* `none`
-    * No configuration at all. Useful if you want to build your own config from scratch and want to avoid loading in the default `base` config profile (not recommended).
+* `legion`
+    * A generic configuration profile to be used with the UCL cluster legion
+* `myriad`
+    * A generic configuration profile to be used with the UCL cluster myriad
 
 ### `--reads`
 Use this to specify the location of your input FastQ files. For example:
@@ -102,16 +64,6 @@ Three command line flags / config parameters set the library strandedness for a 
 
 If not set, the pipeline will be run as unstranded. Specifying `--pico` makes the pipeline run in `forward_stranded` mode.
 
-You can set a default in a cutom Nextflow configuration file such as one saved in `~/.nextflow/config` (see the [nextflow docs](https://www.nextflow.io/docs/latest/config.html) for more). For example:
-
-```groovy
-params {
-    reverse_stranded = true
-}
-```
-
-If you have a default strandedness set in your personal config file you can use `--unstranded` to overwrite it for a given run.
-
 These flags affect the commands used for several steps in the pipeline - namely HISAT2, featureCounts, RSeQC (`RPKM_saturation.py`) and StringTie:
 
 * `--forward_stranded`
@@ -139,41 +91,14 @@ To customise this threshold, use the pipeline command line parameter `--min_aln_
 
 ## Reference Genomes
 
-The pipeline config files come bundled with paths to the illumina iGenomes reference index files. If you are running on UPPMAX, these should work without any additional configuration. If running on AWS, the configuration is set up to use the [AWS-iGenomes](https://ewels.github.io/AWS-iGenomes/) resource.
-
-### `--genome` (using iGenomes)
-There are 31 different species supported in the iGenomes references. To run the pipeline, you must specify which to use with the `--genome` flag.
-
-You can find the keys to specify the genomes in the [iGenomes config file](https://github.com/nf-core/rnaseq/blob/master/conf/igenomes.config). Common genomes that are supported are:
+The pipeline config files come bundled with paths to the following reference genome assemblies: GRCh37, GRCh38, GRCm38. By default, the pipeline uses GRCh38, if you want to use a different one, you must specify it with 
+the `--genome` flag.
 
 * Human
   * `--genome GRCh37`
+  * `--genome GRCh38`
 * Mouse
   * `--genome GRCm38`
-* _Drosophila_
-  * `--genome BDGP6`
-* _S. cerevisiae_
-  * `--genome 'R64-1-1'`
-
-> There are numerous others - check the config file for more.
-
-Note that you can use the same configuration setup to save sets of reference files for your own use, even if they are not part of the iGenomes resource. See the [Nextflow documentation](https://www.nextflow.io/docs/latest/config.html) for instructions on where to save such a file.
-
-The syntax for this reference configuration is as follows:
-
-```groovy
-params {
-  genomes {
-    'GRCh37' {
-      star    = '<path to the star index folder>'
-      fasta   = '<path to the genome fasta file>' // Used if no star index given
-      gtf     = '<path to the genome gtf file>'
-      bed12   = '<path to the genome bed file>' // Generated from GTF if not given
-    }
-    // Any number of additional genomes, key is used with --genome
-  }
-}
-```
 
 ### `--star_index`, `--hisat2_index`, `--fasta`, `--gtf`, `--bed12`
 If you prefer, you can specify the full path to your reference genome when you run the pipeline:
@@ -252,18 +177,6 @@ The following options make this easy:
 ### Automatic resubmission
 Each step in the pipeline has a default set of requirements for number of CPUs, memory and time. For most of the steps in the pipeline, if the job exits with an error code of `143` (exceeded requested resources) it will automatically resubmit with higher requests (2 x original, then 3 x original). If it still fails after three times then the pipeline is stopped.
 
-### Custom resource requests
-Wherever process-specific requirements are set in the pipeline, the default value can be changed by creating a custom config file. See the files in [`conf`](../conf) for examples.
-
-## AWS Batch specific parameters
-Running the pipeline on AWS Batch requires a couple of specific parameters to be set according to your AWS Batch configuration. Please use the `-awsbatch` profile and then specify all of the following parameters.
-### `--awsqueue`
-The JobQueue that you intend to use on AWS Batch.
-### `--awsregion`
-The AWS region to run your job in. Default is set to `eu-west-1` but can be adjusted to your needs.
-
-Please make sure to also set the `-w/--work-dir` and `--outdir` parameters to a S3 storage bucket of your choice - you'll get an error message notifying you if you didn't.
-
 ###
 ## Other command line parameters
 ### `--outdir`
@@ -285,17 +198,6 @@ Specify this when restarting a pipeline. Nextflow will used cached results from 
 You can also supply a run name to resume a specific run: `-resume [run-name]`. Use the `nextflow log` command to show previous run names.
 
 **NB:** Single hyphen (core Nextflow option)
-
-### `-c`
-Specify the path to a specific config file (this is a core NextFlow command).
-
-**NB:** Single hyphen (core Nextflow option)
-
-Note - you can use this to override defaults. For example, if you don't want FastQC errors to be ignored, you can specify a config file using `-c` that contains the following:
-
-```groovy
-process.$fastqc.errorStrategy = 'terminate'
-```
 
 ### `--max_memory`
 Use to set a top-limit for the default memory requirement for each process.

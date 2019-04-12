@@ -84,6 +84,9 @@ If you prefer, you can use [HISAT2](https://ccb.jhu.edu/software/hisat2/index.sh
 
 To use HISAT2, use the parameter `--aligner hisat2` or set `params.aligner = 'hisat2'` in your config file.
 
+Additionally, the pipeline runs [kallisto](https://pachterlab.github.io/kallisto/) for transcript quantification. As it does not need alignment, this step is failry quick, but if you wnat to skip it you cna do it using the 
+`--skip_kallisto` argument.
+
 #### Minimum alignment lengths
 When using STAR as the aligner then the pipeline sets the minimum alignment length to 15 base pairs. This filters out very short read alignments that can result from soft-clipping.
 
@@ -91,8 +94,7 @@ To customise this threshold, use the pipeline command line parameter `--min_aln_
 
 ## Reference Genomes
 
-The pipeline config files come bundled with paths to the following reference genome assemblies: GRCh37, GRCh38, GRCm38. By default, the pipeline uses GRCh38, if you want to use a different one, you must specify it with 
-the `--genome` flag.
+The pipeline config files come bundled with paths to the following reference genome assemblies: GRCh37, GRCh38, GRCm38. The pipeline has this aprameter set up as `false` by default, you need to specify it using the `--genome` flag.
 
 * Human
   * `--genome GRCh37`
@@ -164,6 +166,7 @@ Equivalent to: `--forward_stranded` `--clip_r1 3` `--three_prime_clip_r2 3`
 The pipeline contains a large number of quality control steps. Sometimes, it may not be desirable to run all of them if time and compute resources are limited.
 The following options make this easy:
 
+* `--skip_kallisto` -          Skip kallisto
 * `--skip_qc` -                Skip **all QC steps**, apart from MultiQC
 * `--skip_fastqc` -            Skip FastQC
 * `--skip_rseqc` -             Skip RSeQC

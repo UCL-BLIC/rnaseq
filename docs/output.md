@@ -11,6 +11,7 @@ and processes data using the following steps:
 * [FastQC](#fastqc) - read quality control
 * [TrimGalore](#trimgalore) - adapter trimming
 * [STAR](#star) - alignment
+* [kallisto](#kaliisto) - pseudoalignment and transcript quantification
 * [RSeQC](#rseqc) - RNA quality control metrics
    - [BAM stat](#bam-stat)
    - [Infer experiment](#infer-experiment)
@@ -79,6 +80,12 @@ The STAR section of the MultiQC report shows a bar plot with alignment rates: go
 * `Sample_SJ.out.tab`
   * Filtered splice junctions detected in the mapping
 
+## kallisto
+kallisto is a program for quantifying abundances of transcripts from high-throughput sequencing data. It is based on the novel idea of pseudoalignment for rapidly determining the compatibility of reads with targets, without the need 
+for alignment. 
+Pseudoalignment of reads preserves the key information needed for quantification, and kallisto is therefore not only fast, but also as accurate as existing quantification tools.
+
+**Output directory: `results/kallisto`**
 
 ## RSeQC
 RSeQC is a package of scripts designed to evaluate the quality of RNA seq data. You can find out more about the package at the [RSeQC website](http://rseqc.sourceforge.net/).

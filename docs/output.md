@@ -11,7 +11,7 @@ and processes data using the following steps:
 * [FastQC](#fastqc) - read quality control
 * [TrimGalore](#trimgalore) - adapter trimming
 * [STAR](#star) - alignment
-* [kallisto](#kaliisto) - pseudoalignment and transcript quantification
+* [kallisto](#kallisto) - pseudoalignment and transcript quantification
 * [RSeQC](#rseqc) - RNA quality control metrics
    - [BAM stat](#bam-stat)
    - [Infer experiment](#infer-experiment)

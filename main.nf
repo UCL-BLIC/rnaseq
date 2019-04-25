@@ -554,7 +554,7 @@ process kallisto {
 
 
     script:
-    prefix = reads[0].toString() - ~/(_R1)?(_trimmed)?(_val_1)?(\.fq)?(\.fastq)?(\.gz)?$/
+    prefix = reads[0].toString() - ~/(_R1)?(_001)?(_trimmed)?(_val_1)?(\.fq)?(\.fastq)?(\.gz)?$/
         
     if (params.singleEnd) {
         """
@@ -617,7 +617,7 @@ if(params.aligner == 'star'){
         file "where_are_my_files.txt"
 
         script:
-        prefix = reads[0].toString() - ~/(_R1)?(_trimmed)?(_val_1)?(\.fq)?(\.fastq)?(\.gz)?$/
+        prefix = reads[0].toString() - ~/(_R1)?(_001)?(_trimmed)?(_val_1)?(\.fq)?(\.fastq)?(\.gz)?$/
         def avail_mem = task.memory ? "--limitBAMsortRAM ${task.memory.toBytes() - 100000000}" : ''
         seqCenter = params.seqCenter ? "--outSAMattrRGline ID:$prefix 'CN:$params.seqCenter'" : ''
         """
@@ -669,7 +669,7 @@ if(params.aligner == 'hisat2'){
 
         script:
         index_base = hs2_indices[0].toString() - ~/.\d.ht2/
-        prefix = reads[0].toString() - ~/(_R1)?(_trimmed)?(_val_1)?(\.fq)?(\.fastq)?(\.gz)?$/
+        prefix = reads[0].toString() - ~/(_R1)?(_001)?(_trimmed)?(_val_1)?(\.fq)?(\.fastq)?(\.gz)?$/
         seqCenter = params.seqCenter ? "--rg-id ${prefix} --rg CN:${params.seqCenter.replaceAll('\\s','_')}" : ''
         def rnastrandness = ''
         if (forward_stranded && !unstranded){

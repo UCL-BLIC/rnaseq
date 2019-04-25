@@ -30,6 +30,7 @@ def helpMessage() {
       -profile                      Configuration profile to use. uppmax / uppmax_modules / hebbe / docker / aws
     Options:
       --singleEnd                   Specifies that the input is single end reads
+      --aligner                     Specifies the aligner (STAR or hisat2) [STAR]
     Strandedness:
       --forward_stranded            The library is forward stranded
       --reverse_stranded            The library is reverse stranded
@@ -67,14 +68,13 @@ def helpMessage() {
       --skip_fastqc                 Skip FastQC
       --skip_rseqc                  Skip RSeQC
       --skip_kallisto 		    Skip kallisto
-      --skip_genebody_coverage      Skip calculating genebody coverage
+      --skip_featurecounts          Skip featureCounts
+      --skip_stringtie              Skip stringtie
+      --skip_genebody_coverage      Skip calculating genebody coverage [TRUE]
       --skip_preseq                 Skip Preseq
       --skip_dupradar               Skip dupRadar (and Picard MarkDups)
       --skip_edger                  Skip edgeR MDS plot and heatmap
       --skip_multiqc                Skip MultiQC
-    AWSBatch options:
-      --awsqueue                    The AWSBatch JobQueue that needs to be set when running on AWSBatch
-      --awsregion                   The AWS Region for your AWS Batch job to run on
     """.stripIndent()
 }
 
@@ -113,8 +113,10 @@ params.seqCenter = false
 params.skip_qc = false
 params.skip_fastqc = false
 params.skip_kallisto = false
+params.skip_featurecounts = false
+params.skip_stringtie = false
 params.skip_rseqc = false
-params.skip_genebody_coverage = false
+params.skip_genebody_coverage = true
 params.skip_preseq = false
 params.skip_dupradar = false
 params.skip_edger = false
@@ -970,6 +972,9 @@ process featureCounts {
             else "$filename"
         }
 
+    when:
+    !params.skip_featurecounts
+
     input:
     file bam_featurecounts
     file gtf from gtf_featureCounts.collect()
@@ -1031,6 +1036,9 @@ process stringtieFPKM {
             else "$filename"
         }
 
+    when:
+    !params.skip_stringtie
+
     input:
     file bam_stringtieFPKM
     file gtf from gtf_stringtieFPKM.collect()
@@ -1069,7 +1077,7 @@ process sample_correlation {
     publishDir "${params.outdir}/sample_correlation", mode: 'copy'
 
     when:
-    !params.skip_qc && !params.skip_edger
+    !params.skip_qc && !params.skip_edger && !params.skip_featurecounts
 
     input:
     file input_files from geneCounts.collect()
@@ -1168,9 +1176,9 @@ process multiqc {
     file ('rseqc/*') from genebody_coverage_results.collect().ifEmpty([])
     file ('preseq/*') from preseq_results.collect().ifEmpty([])
     file ('dupradar/*') from dupradar_results.collect().ifEmpty([])
-    file ('featureCounts/*') from featureCounts_logs.collect()
-    file ('featureCounts_biotype/*') from featureCounts_biotype.collect()
-    file ('stringtie/stringtie_log*') from stringtie_log.collect()
+    file ('featureCounts/*') from featureCounts_logs.collect().ifEmpty([])
+    file ('featureCounts_biotype/*') from featureCounts_biotype.collect().ifEmpty([])
+    file ('stringtie/stringtie_log*') from stringtie_log.collect().ifEmpty([])
     file ('sample_correlation_results/*') from sample_correlation_results.collect().ifEmpty([]) // If the Edge-R is not run create an Empty array
     file ('software_versions/*') from software_versions_yaml.collect()
     file ('workflow_summary/*') from workflow_summary_yaml.collect()

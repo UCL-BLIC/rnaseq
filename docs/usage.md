@@ -78,7 +78,7 @@ These flags affect the commands used for several steps in the pipeline - namely 
   * StringTie: `--rf`
 
 ## Alignment tool
-By default, the pipeline uses [STAR](https://github.com/alexdobin/STAR) to align the raw FastQ reads to the reference genome. STAR is fast and common, but requires a lot of memory to run, typically around 38GB for the Human GRCh37 reference genome.
+By default, the pipeline uses [STAR](https://github.com/alexdobin/STAR) to align the raw FastQ reads to the reference genome. STAR is fast and common, but requires a lot of memory to run, typically around 38GB for the Human hg19 reference genome.
 
 If you prefer, you can use [HISAT2](https://ccb.jhu.edu/software/hisat2/index.shtml) as the alignment tool instead. Developed by the same group behind the popular Tophat aligner, HISAT2 has a much smaller memory footprint.
 
@@ -94,13 +94,14 @@ To customise this threshold, use the pipeline command line parameter `--min_aln_
 
 ## Reference Genomes
 
-The pipeline config files come bundled with paths to the following reference genome assemblies: GRCh37, GRCh38, GRCm38. The pipeline has this aprameter set up as `false` by default, you need to specify it using the `--genome` flag.
+The pipeline config files come bundled with paths to the following reference genome assemblies: hg19, hg38, mm10. The pipeline has this aprameter set up as `false` by default, you need to specify it using the `--genome` 
+flag.
 
 * Human
-  * `--genome GRCh37`
-  * `--genome GRCh38`
+  * `--genome hg19`
+  * `--genome hg38`
 * Mouse
-  * `--genome GRCm38`
+  * `--genome mm10`
 
 ### `--star_index`, `--hisat2_index`, `--fasta`, `--gtf`, `--bed12`
 If you prefer, you can specify the full path to your reference genome when you run the pipeline:

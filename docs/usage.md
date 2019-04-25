@@ -6,7 +6,7 @@ The typical command for running the pipeline is as follows:
 module load blic-modules
 module load nextflow
 
-nextflow_rnaseq --reads '*_R{1,2}.fastq.gz' --genome GRCh38
+nextflow_rnaseq --reads '*_R{1,2}.fastq.gz' --genome hg38
 ```
 
 This will launch the pipeline with the `legion` or `myriad` configuration profile, depending on where you submit the job from.
@@ -167,7 +167,6 @@ Equivalent to: `--forward_stranded` `--clip_r1 3` `--three_prime_clip_r2 3`
 The pipeline contains a large number of quality control steps. Sometimes, it may not be desirable to run all of them if time and compute resources are limited.
 The following options make this easy:
 
-* `--skip_kallisto` -          Skip kallisto
 * `--skip_qc` -                Skip **all QC steps**, apart from MultiQC
 * `--skip_fastqc` -            Skip FastQC
 * `--skip_rseqc` -             Skip RSeQC
@@ -176,6 +175,22 @@ The following options make this easy:
 * `--skip_dupradar` -          Skip dupRadar (and Picard MarkDups)
 * `--skip_edger` -             Skip edgeR MDS plot and heatmap
 * `--skip_multiqc` -           Skip MultiQC
+
+Other steps that can be skipped are:
+
+* `--skip_kallisto` -           Skip kallisto
+* `--skip_featurecounts` -      Skip featureCounts
+* `--skip_stringtie` -          Skip stringtie
+
+The above is useful if for example you are only interested in doing the alignments and nothing else, which cna be done by running the pipeline with the following parameters:
+```bash
+module load blic-modules
+module load nextflow
+
+nextflow_rnaseq --reads '*_R{1,2}.fastq.gz' --genome hg38 \
+	--skip_qc --skip_kallisto --skip_featurecounts --skip_stringtie --skip_multiqc   \
+	--saveAlignedIntermediates
+```
 
 ## Job Resources
 ### Automatic resubmission

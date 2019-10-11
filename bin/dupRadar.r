@@ -31,9 +31,14 @@ message("R package loc. (Arg 6): ", ifelse(length(args) > 4, args[5], "Not speci
 message("Output basename       : ", input_bam_basename)
 
 
+#-----------------------------
+#-----------------------------
 # Load / install packages
-
-.libPaths( c( "/shared/ucl/depts/cancer/apps/nextflow_pipelines/rnaseq-master/Rlibs/3.4", .libPaths() ) )
+#-----------------------------
+#-----------------------------------------------------------
+#- not needed anymore because I added dupradar to bioconda
+#-----------------------------------------------------------
+#-  .libPaths( c( "/shared/ucl/depts/cancer/apps/nextflow_pipelines/rnaseq/Rlibs/3.4", .libPaths() ) )
 
 if (length(args) > 5) { .libPaths( c( args[6], .libPaths() ) ) }
 if (!require("dupRadar")){
